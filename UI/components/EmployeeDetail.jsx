@@ -62,13 +62,13 @@ class EmployeeDetail extends React.Component {
       this.loadEmployeeData();
     }
   }
-
+  
   render() {
     const { employee, error } = this.state;
     if (error) {
       return <div>{error}</div>;
     }
-
+    
     return (
       <div>
         <h1>Employee Details</h1>
@@ -84,7 +84,7 @@ class EmployeeDetail extends React.Component {
               <b>Age:</b> {employee.age}
             </p>
             <p>
-              <b>Date of Joining:</b> {employee.dateOfJoining}
+              <b>Date of Joining:</b> {new Date(employee.dateOfJoining).toDateString()}
             </p>
             <p>
               <b>Title:</b> {employee.title}
