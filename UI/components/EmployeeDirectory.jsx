@@ -35,7 +35,6 @@ class EmployeeDirectory extends React.Component {
           id firstName lastName age dateOfJoining title department employeeType contractType
         }
       }`;
-    console.log(query);
     const response = await fetch("/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

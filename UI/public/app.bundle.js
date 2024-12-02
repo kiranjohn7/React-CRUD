@@ -455,7 +455,7 @@ var EmployeeDetail = /*#__PURE__*/function (_React$Component) {
       if (error) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, error);
       }
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", null, "Employee Details"), employee && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "First Name:"), " ", employee.firstName), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Last Name:"), " ", employee.lastName), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Age:"), " ", employee.age), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Date of Joining:"), " ", employee.dateOfJoining), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Title:"), " ", employee.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Department:"), " ", employee.department), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Employee Type:"), " ", employee.employeeType), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Contract Type:"), " ", employee.contractType ? "Working" : "Retired")));
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", null, "Employee Details"), employee && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "First Name:"), " ", employee.firstName), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Last Name:"), " ", employee.lastName), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Age:"), " ", employee.age), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Date of Joining:"), " ", new Date(employee.dateOfJoining).toDateString()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Title:"), " ", employee.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Department:"), " ", employee.department), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Employee Type:"), " ", employee.employeeType), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("b", null, "Contract Type:"), " ", employee.contractType ? "Working" : "Retired")));
     }
   }]);
 }((react__WEBPACK_IMPORTED_MODULE_0___default().Component));
@@ -522,8 +522,7 @@ var EmployeeDirectory = /*#__PURE__*/function (_React$Component) {
             params = new URLSearchParams(_this.props.myloc.search); //parsing the query parameters from URL
             type = params.get("type") || "";
             query = "query  {\n        employees (type: \"".concat(type, "\") {\n          id firstName lastName age dateOfJoining title department employeeType contractType\n        }\n      }");
-            console.log(query);
-            _context.next = 6;
+            _context.next = 5;
             return fetch("/graphql", {
               method: "POST",
               headers: {
@@ -533,16 +532,16 @@ var EmployeeDirectory = /*#__PURE__*/function (_React$Component) {
                 query: query
               })
             });
-          case 6:
+          case 5:
             response = _context.sent;
-            _context.next = 9;
+            _context.next = 8;
             return response.json();
-          case 9:
+          case 8:
             result = _context.sent;
             _this.setState({
               employees: result.data.employees
             }); // the state is updated with the fetched employee data
-          case 11:
+          case 10:
           case "end":
             return _context.stop();
         }
@@ -732,8 +731,12 @@ var EmployeeRow = /*#__PURE__*/function (_React$Component) {
     }
     _this = _callSuper(this, EmployeeRow, [].concat(args));
     _defineProperty(_this, "confirmDel", function () {
-      if (confirm("Are you sure you want to delete this employee ".concat(_this.props.employee.lastName, ", ").concat(_this.props.employee.firstName))) {
-        _this.props.deleteEmployee(_this.props.employee);
+      if (_this.props.employee.contractType == true) {
+        alert("The working employee cannot be deleted.");
+      } else {
+        if (confirm("Are you sure you want to delete this employee ".concat(_this.props.employee.lastName, ", ").concat(_this.props.employee.firstName))) {
+          _this.props.deleteEmployee(_this.props.employee);
+        }
       }
     });
     return _this;

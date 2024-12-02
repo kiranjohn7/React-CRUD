@@ -3,12 +3,16 @@ import { Link } from "react-router-dom";
 
 class EmployeeRow extends React.Component {
   confirmDel = () => {
-    if (
-      confirm(
-        `Are you sure you want to delete this employee ${this.props.employee.lastName}, ${this.props.employee.firstName}`
-      )
-    ) {
-      this.props.deleteEmployee(this.props.employee);
+    if (this.props.employee.contractType == true) {
+      alert("The working employee cannot be deleted.");
+    } else {
+      if (
+        confirm(
+          `Are you sure you want to delete this employee ${this.props.employee.lastName}, ${this.props.employee.firstName}`
+        )
+      ) {
+        this.props.deleteEmployee(this.props.employee);
+      }
     }
   };
   render() {
