@@ -15,8 +15,10 @@ class EmployeeCreate extends React.Component {
       errormsg: "",
       employee: null,
       isEdit: false,
+      ageCalculation: "",
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   // To load the employee data if the ID is provided on the URL
@@ -31,7 +33,7 @@ class EmployeeCreate extends React.Component {
     try {
       const query = `query {
           employee(id: ${id}) {
-            id firstName lastName age dateOfJoining title department employeeType contractType
+            id firstName lastName dob age dateOfJoining title department employeeType contractType
           }
         }`;
       const response = await fetch("/graphql", {
@@ -70,8 +72,8 @@ class EmployeeCreate extends React.Component {
       errors.lastName = "Last name is required.";
     }
 
-    if (!employee.age || employee.age < 20 || employee.age > 70) {
-      errors.age = "Age must be between 20 and 70.";
+    if (!employee.dob || employee.dob === "") {
+      errors.dob = "Date of birth is required.";
     }
 
     if (!employee.dateOfJoining || employee.dateOfJoining === "") {
@@ -85,8 +87,50 @@ class EmployeeCreate extends React.Component {
     if (!employee.department || employee.department === "") {
       errors.department = "Department is required.";
     }
-
     return errors;
+  }
+
+  // Calculate age based on the DOB
+  ageCalculation(dob) {
+    const currentDate = new Date();
+    const birthday = new Date(dob);
+    let age = currentDate.getFullYear() - birthday.getFullYear();
+    const monthDiff = currentDate.getMonth() - birthday.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && currentDate.getDate() < birthday.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  }
+
+  // this fuction is for handling dob calculation
+  handleChange(event) {
+    const dob = event.target.value;
+    const age = this.ageCalculation(dob);
+
+    if (age < 20 || age > 70) {
+      this.setState({
+        errors: {
+          ...this.state.errors,
+          dob: "Age must be between 20 and 70.",
+          age: "Age must be between 20 and 70.",
+        },
+        calculatedAge: "",
+      });
+    } else {
+      this.setState({
+        errors: {
+          ...this.state.errors,
+          dob: null,
+          age: null,
+        },
+        calculatedAge: age,
+      });
+    }
   }
 
   async handleSubmit(e) {
@@ -95,14 +139,17 @@ class EmployeeCreate extends React.Component {
     const employee = {
       firstName: form.firstName.value,
       lastName: form.lastName.value,
+      dob: form.dob.value,
       age: parseInt(form.age.value),
       dateOfJoining: form.dateOfJoining.value,
       title: form.title.value,
       department: form.department.value,
       employeeType: form.employeeType.value,
-      contractType: this.state.isEdit ? JSON.parse(form.contractType.value) : true,
+      contractType: this.state.isEdit
+      ? JSON.parse(form.contractType.value)
+      : true,
     };
-    
+
     // Validates the imputs in the form and displays the error if it fails
     const errors = this.validateForm(employee);
     if (Object.keys(errors).length > 0) {
@@ -110,24 +157,27 @@ class EmployeeCreate extends React.Component {
       return;
     }
     this.setState({ errors: {} });
-    
+
     // if the isEdit is true then it will display the form for editing if not its for create employee
-    const query =this.state.isEdit ? `
+    const query = this.state.isEdit
+      ? `
     mutation updateEmployee($id: Int!, $employee: EmployeeInputType!) {
       updateEmployee(id: $id ,employee: $employee) {
-        id firstName lastName age dateOfJoining title department employeeType contractType
+        id firstName lastName dob age dateOfJoining title department employeeType contractType
       }
     }
-  ` :  `
+  `
+      : `
       mutation createEmployee($employee: EmployeeInputType!) {
         createEmployee(employee: $employee) {
-          id firstName lastName age dateOfJoining title department employeeType contractType
+          id firstName lastName dob age dateOfJoining title department employeeType contractType
         }
       }
     `;
-    console.log(employee);
-    
-    const variables = this.state.isEdit ? {id: parseInt(this.state.employee.id), employee} : {employee};
+
+    const variables = this.state.isEdit
+      ? { id: parseInt(this.state.employee.id), employee }
+      : { employee };
     const response = await fetch("/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,9 +185,14 @@ class EmployeeCreate extends React.Component {
     });
     const result = await response.json();
 
-    if (this.state.isEdit ? result.data.updateEmployee : result.data.createEmployee) {
-      this.state.isEdit ? alert("Employee Updated successfully!") :
-      alert("Employee created successfully!");
+    if (
+      this.state.isEdit
+        ? result.data.updateEmployee
+        : result.data.createEmployee
+    ) {
+      this.state.isEdit
+        ? alert("Employee Updated successfully!")
+        : alert("Employee created successfully!");
       form.reset();
     }
     this.props.mynav("/employees");
@@ -148,7 +203,7 @@ class EmployeeCreate extends React.Component {
     return (
       <div>
         <center>
-          <h1>{this.state.isEdit ? 'Edit' : 'Create'} Employee </h1>
+          <h1>{this.state.isEdit ? "Edit" : "Create"} Employee </h1>
 
           <form name="createEmployee" onSubmit={this.handleSubmit}>
             <div>
@@ -179,14 +234,28 @@ class EmployeeCreate extends React.Component {
               )}
             </div>
             <br />
+              <div>
+                <label>DOB:</label>
+                <input
+                  type="date"
+                  name="dob"
+                  placeholder="DOB"
+                  defaultValue={employee ? employee.dob.slice(0, 10) : ""}
+                  onChange={this.handleChange}
+                />
+                {this.state.errors.dob && <div>{this.state.errors.dob}</div>}
+              </div>
+            <br />
             <div>
               <label>Age: </label>
               <input
                 type="number"
                 name="age"
                 placeholder="Age"
-                defaultValue={employee ? employee.age : ""}
-                disabled={!!employee}
+                defaultValue={
+                  this.state.isEdit ? employee.age : this.state.calculatedAge
+                }
+                disabled
               />
               {this.state.errors.age && <div>{this.state.errors.age}</div>}
             </div>
@@ -213,11 +282,39 @@ class EmployeeCreate extends React.Component {
                 name="title"
                 defaultValue={employee ? employee.title : ""}
               >
-                <option value="" disabled selected>Select Title</option>
-                <option value="Employee" selected={employee && employee.title == "Employee" ? true : false}>Employee</option>
-                <option value="Manager" selected={employee && employee.title == "Manager" ? true : false}>Manager</option>
-                <option value="Director" selected={employee && employee.title == "Director" ? true : false}>Director</option>
-                <option value="VP" selected={employee && employee.title == "VP" ? true : false}>VP</option>
+                <option value="" disabled selected>
+                  Select Title
+                </option>
+                <option
+                  value="Employee"
+                  selected={
+                    employee && employee.title == "Employee" ? true : false
+                  }
+                >
+                  Employee
+                </option>
+                <option
+                  value="Manager"
+                  selected={
+                    employee && employee.title == "Manager" ? true : false
+                  }
+                >
+                  Manager
+                </option>
+                <option
+                  value="Director"
+                  selected={
+                    employee && employee.title == "Director" ? true : false
+                  }
+                >
+                  Director
+                </option>
+                <option
+                  value="VP"
+                  selected={employee && employee.title == "VP" ? true : false}
+                >
+                  VP
+                </option>
               </select>
               {this.state.errors.title && <div>{this.state.errors.title}</div>}
             </div>
@@ -228,11 +325,45 @@ class EmployeeCreate extends React.Component {
                 name="department"
                 defaultValue={employee ? employee.department : ""}
               >
-                <option value="" disabled selected>Select Department</option>
-                <option value="IT" selected={employee && employee.department == "IT" ? true : false}>IT</option>
-                <option value="Marketing" selected={employee && employee.department == "Marketing" ? true : false}>Marketing</option>
-                <option value="HR" selected={employee && employee.department == "HR" ? true : false}>HR</option>
-                <option value="Engineering" selected={employee && employee.department == "Engineering" ? true : false}>Engineering</option>
+                <option value="" disabled selected>
+                  Select Department
+                </option>
+                <option
+                  value="IT"
+                  selected={
+                    employee && employee.department == "IT" ? true : false
+                  }
+                >
+                  IT
+                </option>
+                <option
+                  value="Marketing"
+                  selected={
+                    employee && employee.department == "Marketing"
+                      ? true
+                      : false
+                  }
+                >
+                  Marketing
+                </option>
+                <option
+                  value="HR"
+                  selected={
+                    employee && employee.department == "HR" ? true : false
+                  }
+                >
+                  HR
+                </option>
+                <option
+                  value="Engineering"
+                  selected={
+                    employee && employee.department == "Engineering"
+                      ? true
+                      : false
+                  }
+                >
+                  Engineering
+                </option>
               </select>
               {this.state.errors.department && (
                 <div>{this.state.errors.department}</div>
@@ -246,10 +377,46 @@ class EmployeeCreate extends React.Component {
                 defaultValue={employee ? employee.employeeType : ""}
                 disabled={!!employee}
               >
-                <option value="FullTime" selected={employee && employee.employeeType == "FullTime" ? true : false}>Full Time</option>
-                <option value="PartTime" selected={employee && employee.employeeType == "PartTime" ? true : false}>Part Time</option>
-                <option value="Contract" selected={employee && employee.employeeType == "Contract" ? true : false}>Contract</option>
-                <option value="Seasonal" selected={employee && employee.employeeType == "Seasonal" ? true : false}>Seasonal</option>
+                <option
+                  value="FullTime"
+                  selected={
+                    employee && employee.employeeType == "FullTime"
+                      ? true
+                      : false
+                  }
+                >
+                  Full Time
+                </option>
+                <option
+                  value="PartTime"
+                  selected={
+                    employee && employee.employeeType == "PartTime"
+                      ? true
+                      : false
+                  }
+                >
+                  Part Time
+                </option>
+                <option
+                  value="Contract"
+                  selected={
+                    employee && employee.employeeType == "Contract"
+                      ? true
+                      : false
+                  }
+                >
+                  Contract
+                </option>
+                <option
+                  value="Seasonal"
+                  selected={
+                    employee && employee.employeeType == "Seasonal"
+                      ? true
+                      : false
+                  }
+                >
+                  Seasonal
+                </option>
               </select>
             </div>
             <br />
@@ -259,9 +426,24 @@ class EmployeeCreate extends React.Component {
                 <select
                   name="contractType"
                   id="contractType"
-                  defaultValue={employee ? employee.contractType : true}>
-                <option value={true} selected={employee && employee.contractType == true ? true : false}>Working</option>
-                <option value={false} selected={employee && employee.contractType == false ? true : false}>Retired</option>
+                  defaultValue={employee ? employee.contractType : true}
+                >
+                  <option
+                    value={true}
+                    selected={
+                      employee && employee.contractType == true ? true : false
+                    }
+                  >
+                    Working
+                  </option>
+                  <option
+                    value={false}
+                    selected={
+                      employee && employee.contractType == false ? true : false
+                    }
+                  >
+                    Retired
+                  </option>
                 </select>
               </div>
             )}

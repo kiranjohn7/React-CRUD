@@ -32,7 +32,7 @@ class EmployeeDirectory extends React.Component {
     const type = params.get("type") || "";
     const query = `query  {
         employees (type: "${type}") {
-          id firstName lastName age dateOfJoining title department employeeType contractType
+          id firstName lastName dob age dateOfJoining title department employeeType contractType
         }
       }`;
     const response = await fetch("/graphql", {

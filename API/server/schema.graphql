@@ -4,6 +4,7 @@ type Employee {
   id: Int!
   firstName: String!
   lastName: String!
+  dob: GraphQlDate!
   age: Int!
   dateOfJoining: GraphQlDate!
   title: String!
@@ -15,6 +16,7 @@ type Employee {
 input EmployeeInputType {
   firstName: String!
   lastName: String!
+  dob: GraphQlDate!
   age: Int!
   dateOfJoining: GraphQlDate!
   title: String!

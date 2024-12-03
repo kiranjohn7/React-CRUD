@@ -28,7 +28,7 @@ class EmployeeDetail extends React.Component {
     try {
       const query = `query {
         employee(id: ${id}) {
-          id firstName lastName age dateOfJoining title department employeeType contractType
+          id firstName lastName dob age dateOfJoining title department employeeType contractType
         }
       }`;
       const response = await fetch("/graphql", {
@@ -79,6 +79,9 @@ class EmployeeDetail extends React.Component {
             </p>
             <p>
               <b>Last Name:</b> {employee.lastName}
+            </p>
+            <p>
+              <b>DOB:</b> {new Date (employee.dob).toDateString()}
             </p>
             <p>
               <b>Age:</b> {employee.age}

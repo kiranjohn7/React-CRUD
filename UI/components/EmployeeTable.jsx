@@ -17,7 +17,7 @@ class EmployeeRow extends React.Component {
   };
   render() {
     const isoDOJ = new Date(this.props.employee.dateOfJoining).toDateString();
-
+    
     return (
       <tr key={this.props.employee.id}>
         <td>{this.props.employee.firstName}</td>
