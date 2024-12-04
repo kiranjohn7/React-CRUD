@@ -30,6 +30,7 @@ export default function EmployeeSearch() {
         <option value="PartTime">Part Time</option>
         <option value="Contract">Contract</option>
         <option value="Seasonal">Seasonal</option>
+        <option value="upcomingRetirement">Upcoming Retirement</option>
       </select>
       <button onClick={filterEmpType}>Search </button>
     </div>

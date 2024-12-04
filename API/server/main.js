@@ -47,18 +47,75 @@ async function loadSchema() {
 
   //Filtering the employee by type
   async function getEmployees(_, { type }) {
-    return await getAllEmployees(type);
+    const employees = await getAllEmployees();
+    const filteredEmployees = filterEmployees(employees, type);
+    return filteredEmployees.map(handleEmployementRetirement);
+  }
+
+  // Getting employees by ID
+  async function getEmployeebyID(_, { id }) {
+    const employee = await getEmployeesbyID(id);
+    if (!employee) {
+      throw new Error(`Employee with ID ${id} not found.`);
+    }
+    return handleEmployementRetirement(employee);
+  }
+
+  function retirementCalc(employee, retirementAge = 70) {
+    const dob = new Date(employee.dob);
+    const retirementDate = new Date(dob);
+    retirementDate.setFullYear(retirementDate.getFullYear() + retirementAge);
+
+    const today = new Date();
+    const timeDiff = retirementDate - today;
+
+    if (timeDiff < 0) {
+      return {
+        retirementDate: retirementDate,
+        remainingTime: null,
+      };
+    }
+
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const months = Math.floor(days / 30);
+    const years = Math.floor(months / 12);
+
+    return {
+      retirementDate: retirementDate,
+      remainingTime: {
+        days: days % 30,
+        months: months % 12,
+        years,
+      },
+    };
+  }
+
+  function handleEmployementRetirement(employee) {
+    const retirementInfo = retirementCalc(employee);
+    return {
+      ...employee,
+      ...retirementInfo,
+    };
+  }
+
+  function filterEmployees(employees, type, today = new Date()) {
+    if (type === "upcomingRetirement") {
+      const sixMonthCalc = new Date(today);
+      sixMonthCalc.setMonth(today.getMonth() + 6);
+
+      return employees.filter((employee) => {
+        const { retirementDate } = retirementCalc(employee);
+        const retirementDateObj = new Date(retirementDate);
+        return retirementDateObj > today && retirementDateObj <= sixMonthCalc;
+      });
+    }
+    return employees;
   }
 
   //Adding a new employee
   async function addEmployee(_, { employee }) {
     await addEmployees(employee);
     return employee;
-  }
-
-  // Getting employees by ID
-  async function getEmployeebyID(_, { id }) {
-    return await getEmployeesbyID(id);
   }
 
   // Deleting employees by ID

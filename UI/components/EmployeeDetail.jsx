@@ -28,7 +28,22 @@ class EmployeeDetail extends React.Component {
     try {
       const query = `query {
         employee(id: ${id}) {
-          id firstName lastName dob age dateOfJoining title department employeeType contractType
+          id
+          firstName
+          lastName
+          dob
+          age
+          dateOfJoining
+          title
+          department
+          employeeType
+          contractType
+          retirementDate
+          remainingTime {
+            days
+            months
+            years
+          }
         }
       }`;
       const response = await fetch("/graphql", {
@@ -81,13 +96,13 @@ class EmployeeDetail extends React.Component {
               <b>Last Name:</b> {employee.lastName}
             </p>
             <p>
-              <b>DOB:</b> {new Date (employee.dob).toDateString()}
+              <b>DOB:</b> {new Date(employee.dob).toDateString()}
             </p>
             <p>
               <b>Age:</b> {employee.age}
             </p>
             <p>
-              <b>Date of Joining:</b> {new Date (employee.dateOfJoining).toDateString()}
+              <b>Date of Joining:</b> {new Date(employee.dateOfJoining).toDateString()}
             </p>
             <p>
               <b>Title:</b> {employee.title}
@@ -101,6 +116,13 @@ class EmployeeDetail extends React.Component {
             <p>
               <b>Contract Type:</b>{" "}
               {employee.contractType ? "Working" : "Retired"}
+            </p>
+            <p>
+              <b>Retirement Date:</b> {new Date(employee.retirementDate).toDateString()}
+            </p>
+            <p>
+              <b>Time Left Until Retirement:</b>{" "}
+              {employee.remainingTime.years} years, {employee.remainingTime.months} months, {employee.remainingTime.days} days
             </p>
           </div>
         )}

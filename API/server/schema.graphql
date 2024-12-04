@@ -11,6 +11,14 @@ type Employee {
   department: String!
   employeeType: String!
   contractType: Boolean!
+  retirementDate: GraphQlDate!
+  remainingTime: RemainingTime!
+}
+
+type RemainingTime {
+  days: Int!
+  months: Int!
+  years: Int!
 }
 
 input EmployeeInputType {
@@ -35,4 +43,3 @@ type Mutation {
   updateEmployee(id: Int!, employee: EmployeeInputType!): Employee!
   deleteEmployee(id: Int!): Boolean
 }
-
