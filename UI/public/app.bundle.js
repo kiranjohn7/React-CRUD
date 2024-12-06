@@ -130,6 +130,7 @@ var EmployeeCreate = /*#__PURE__*/function (_React$Component) {
     // validation for the form
     function validateForm(employee) {
       var errors = {};
+      var dateValidation = new Date();
       if (!employee.firstName || employee.firstName.trim() === "") {
         errors.firstName = "First name is required.";
       }
@@ -138,9 +139,16 @@ var EmployeeCreate = /*#__PURE__*/function (_React$Component) {
       }
       if (!employee.dob || employee.dob === "") {
         errors.dob = "Date of birth is required.";
+      } else {
+        var age = this.ageCalculation(employee.dob);
+        if (age < 20 || age > 70) {
+          errors.dob = "Age must be between 20 and 70 years.";
+        }
       }
       if (!employee.dateOfJoining || employee.dateOfJoining === "") {
         errors.dateOfJoining = "Date of joining is required.";
+      } else if (new Date(employee.dateOfJoining) > dateValidation) {
+        errors.dateOfJoining = "Date of joining cannot be in the future.";
       }
       if (!employee.title || employee.title === "") {
         errors.title = "Title is required.";
@@ -169,24 +177,42 @@ var EmployeeCreate = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "handleChange",
     value: function handleChange(event) {
-      var dob = event.target.value;
-      var age = this.ageCalculation(dob);
-      if (age < 20 || age > 70) {
-        this.setState({
-          errors: _objectSpread(_objectSpread({}, this.state.errors), {}, {
-            dob: "Age must be between 20 and 70.",
-            age: "Age must be between 20 and 70."
-          }),
-          calculatedAge: ""
-        });
-      } else {
-        this.setState({
-          errors: _objectSpread(_objectSpread({}, this.state.errors), {}, {
-            dob: null,
-            age: null
-          }),
-          calculatedAge: age
-        });
+      var _event$target = event.target,
+        name = _event$target.name,
+        value = _event$target.value;
+      var currentDate = new Date();
+      if (name === "dob") {
+        var age = this.ageCalculation(value);
+        if (age < 20 || age > 70) {
+          this.setState({
+            errors: _objectSpread(_objectSpread({}, this.state.errors), {}, {
+              dob: "Age must be between 20 and 70."
+            }),
+            calculatedAge: ""
+          });
+        } else {
+          this.setState({
+            errors: _objectSpread(_objectSpread({}, this.state.errors), {}, {
+              dob: null
+            }),
+            calculatedAge: age
+          });
+        }
+      }
+      if (name === "dateOfJoining") {
+        if (new Date(value) > currentDate) {
+          this.setState({
+            errors: _objectSpread(_objectSpread({}, this.state.errors), {}, {
+              dateOfJoining: "Date of joining cannot be in the future."
+            })
+          });
+        } else {
+          this.setState({
+            errors: _objectSpread(_objectSpread({}, this.state.errors), {}, {
+              dateOfJoining: null
+            })
+          });
+        }
       }
     }
   }, {
@@ -269,6 +295,13 @@ var EmployeeCreate = /*#__PURE__*/function (_React$Component) {
     key: "render",
     value: function render() {
       var employee = this.state.employee;
+      var currentDate = new Date();
+      var minDOB = new Date();
+      var maxDOB = new Date();
+
+      // Calculating the minimum and maximum dates for DOB 
+      minDOB.setFullYear(currentDate.getFullYear() - 70);
+      maxDOB.setFullYear(currentDate.getFullYear() - 20);
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("center", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", null, this.state.isEdit ? "Edit" : "Create", " Employee "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
         name: "createEmployee",
         onSubmit: this.handleSubmit
@@ -289,7 +322,10 @@ var EmployeeCreate = /*#__PURE__*/function (_React$Component) {
         name: "dob",
         placeholder: "DOB",
         defaultValue: employee ? employee.dob.slice(0, 10) : "",
-        onChange: this.handleChange
+        onChange: this.handleChange,
+        disabled: !!employee,
+        min: minDOB.toISOString().split("T")[0],
+        max: maxDOB.toISOString().split("T")[0]
       }), this.state.errors.dob && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, this.state.errors.dob)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", null, "Age: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
         type: "number",
         name: "age",
@@ -301,7 +337,8 @@ var EmployeeCreate = /*#__PURE__*/function (_React$Component) {
         name: "dateOfJoining",
         placeholder: "Date Of Joining",
         defaultValue: employee ? employee.dateOfJoining.slice(0, 10) : "",
-        disabled: !!employee
+        disabled: !!employee,
+        max: currentDate.toISOString().split("T")[0]
       }), this.state.errors.dateOfJoining && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, this.state.errors.dateOfJoining)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", null, "Title: "), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("select", {
         name: "title",
         defaultValue: employee ? employee.title : ""

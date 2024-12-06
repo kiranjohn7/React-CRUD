@@ -63,6 +63,7 @@ class EmployeeCreate extends React.Component {
   // validation for the form
   validateForm(employee) {
     const errors = {};
+    const dateValidation = new Date();
 
     if (!employee.firstName || employee.firstName.trim() === "") {
       errors.firstName = "First name is required.";
@@ -74,10 +75,17 @@ class EmployeeCreate extends React.Component {
 
     if (!employee.dob || employee.dob === "") {
       errors.dob = "Date of birth is required.";
+    } else {
+      const age = this.ageCalculation(employee.dob);
+      if (age < 20 || age > 70) {
+        errors.dob = "Age must be between 20 and 70 years.";
+      }
     }
 
     if (!employee.dateOfJoining || employee.dateOfJoining === "") {
       errors.dateOfJoining = "Date of joining is required.";
+    } else if (new Date(employee.dateOfJoining) > dateValidation) {
+      errors.dateOfJoining = "Date of joining cannot be in the future.";
     }
 
     if (!employee.title || employee.title === "") {
@@ -109,27 +117,46 @@ class EmployeeCreate extends React.Component {
 
   // this fuction is for handling dob calculation
   handleChange(event) {
-    const dob = event.target.value;
-    const age = this.ageCalculation(dob);
+    const { name, value } = event.target;
+    const currentDate = new Date();
 
-    if (age < 20 || age > 70) {
-      this.setState({
-        errors: {
-          ...this.state.errors,
-          dob: "Age must be between 20 and 70.",
-          age: "Age must be between 20 and 70.",
-        },
-        calculatedAge: "",
-      });
-    } else {
-      this.setState({
-        errors: {
-          ...this.state.errors,
-          dob: null,
-          age: null,
-        },
-        calculatedAge: age,
-      });
+    if (name === "dob") {
+      const age = this.ageCalculation(value);
+      if (age < 20 || age > 70) {
+        this.setState({
+          errors: {
+            ...this.state.errors,
+            dob: "Age must be between 20 and 70.",
+          },
+          calculatedAge: "",
+        });
+      } else {
+        this.setState({
+          errors: {
+            ...this.state.errors,
+            dob: null,
+          },
+          calculatedAge: age,
+        });
+      }
+    }
+
+    if (name === "dateOfJoining") {
+      if (new Date(value) > currentDate) {
+        this.setState({
+          errors: {
+            ...this.state.errors,
+            dateOfJoining: "Date of joining cannot be in the future.",
+          },
+        });
+      } else {
+        this.setState({
+          errors: {
+            ...this.state.errors,
+            dateOfJoining: null,
+          },
+        });
+      }
     }
   }
 
@@ -146,8 +173,8 @@ class EmployeeCreate extends React.Component {
       department: form.department.value,
       employeeType: form.employeeType.value,
       contractType: this.state.isEdit
-      ? JSON.parse(form.contractType.value)
-      : true,
+        ? JSON.parse(form.contractType.value)
+        : true,
     };
 
     // Validates the imputs in the form and displays the error if it fails
@@ -200,6 +227,14 @@ class EmployeeCreate extends React.Component {
 
   render() {
     const { employee } = this.state;
+    const currentDate = new Date();
+    const minDOB = new Date();
+    const maxDOB = new Date();
+
+    // Calculating the minimum and maximum dates for DOB 
+    minDOB.setFullYear(currentDate.getFullYear() - 70); 
+    maxDOB.setFullYear(currentDate.getFullYear() - 20);
+
     return (
       <div>
         <center>
@@ -234,17 +269,20 @@ class EmployeeCreate extends React.Component {
               )}
             </div>
             <br />
-              <div>
-                <label>DOB:</label>
-                <input
-                  type="date"
-                  name="dob"
-                  placeholder="DOB"
-                  defaultValue={employee ? employee.dob.slice(0, 10) : ""}
-                  onChange={this.handleChange}
-                />
-                {this.state.errors.dob && <div>{this.state.errors.dob}</div>}
-              </div>
+            <div>
+              <label>DOB:</label>
+              <input
+                type="date"
+                name="dob"
+                placeholder="DOB"
+                defaultValue={employee ? employee.dob.slice(0, 10) : ""}
+                onChange={this.handleChange}
+                disabled={!!employee}
+                min={minDOB.toISOString().split("T")[0]}
+                max={maxDOB.toISOString().split("T")[0]}
+              />
+              {this.state.errors.dob && <div>{this.state.errors.dob}</div>}
+            </div>
             <br />
             <div>
               <label>Age: </label>
@@ -270,6 +308,7 @@ class EmployeeCreate extends React.Component {
                   employee ? employee.dateOfJoining.slice(0, 10) : ""
                 }
                 disabled={!!employee}
+                max={currentDate.toISOString().split("T")[0]}
               />
               {this.state.errors.dateOfJoining && (
                 <div>{this.state.errors.dateOfJoining}</div>
