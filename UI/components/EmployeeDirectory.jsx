@@ -30,11 +30,29 @@ class EmployeeDirectory extends React.Component {
   loadData = async () => {
     const params = new URLSearchParams(this.props.myloc.search); //parsing the query parameters from URL
     const type = params.get("type") || "";
-    const query = `query  {
-        employees (type: "${type}") {
-          id firstName lastName dob age dateOfJoining title department employeeType contractType
+    const upcomingRetirement = params.get("upcomingRetirement") === "true"; 
+    const query = `
+    query {
+      employees(type: "${type}", upcomingRetirement: ${upcomingRetirement}) {
+        id
+        firstName
+        lastName
+        dob
+        age
+        dateOfJoining
+        title
+        department
+        employeeType
+        contractType
+        retirementDate
+        remainingTime {
+          years
+          months
+          days
         }
-      }`;
+      }
+    }
+  `;
     const response = await fetch("/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -29,6 +29,23 @@ class EmployeeCreate extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    // Get the current 'id' parameter from the URL
+    const currentId = this.props.params.id;
+    if (prevProps.params.id !== currentId) {
+      if (currentId) {
+        this.loadEmployeeData(currentId);
+      } else {
+        // If there is no ID then reset the state
+        this.setState({
+          employee: null,      
+          isEdit: false,       
+          errors: {}  
+        });
+      }
+    }
+  }
+
   loadEmployeeData = async (id) => {
     try {
       const query = `query {

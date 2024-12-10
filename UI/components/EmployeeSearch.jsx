@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function EmployeeSearch() {
-  const [employeeType, setEmployeeType] = useState("");  // to store the selected employee
+  const [employeeType, setEmployeeType] = useState(""); // to store the selected employee
+  const [upcomingRetirement, setUpcomingRetirement] = useState(false); // New state to store the upcomingRetirement filter
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -10,12 +11,15 @@ export default function EmployeeSearch() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const type = params.get("type") || "";
+    const retirement = params.get("upcomingRetirement") === "true"; // Check if retirement filter is set
     setEmployeeType(type); // Updating the state
+    setUpcomingRetirement(retirement);
   }, [location.search]); // this triggers when the query string changes
 
-  // function to filter employees based on type and updates the URL 
+  // function to filter employees based on type and updates the URL
   const filterEmpType = () => {
-    navigate(`/employees?type=${employeeType}`); // this is to navigate to the updated url
+    const query = `/employees?type=${employeeType}&upcomingRetirement=${upcomingRetirement}`;
+    navigate(query);
   };
 
   return (
@@ -30,8 +34,15 @@ export default function EmployeeSearch() {
         <option value="PartTime">Part Time</option>
         <option value="Contract">Contract</option>
         <option value="Seasonal">Seasonal</option>
-        <option value="upcomingRetirement">Upcoming Retirement</option>
       </select>
+      <label>
+        <input
+          type="checkbox"
+          checked={upcomingRetirement}
+          onChange={() => setUpcomingRetirement(!upcomingRetirement)}  // Toggle the retirement filter
+        />
+        Show Upcoming Retirement
+      </label>
       <button onClick={filterEmpType}>Search </button>
     </div>
   );

@@ -125,6 +125,24 @@ var EmployeeCreate = /*#__PURE__*/function (_React$Component) {
       }
     }
   }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      // Get the current 'id' parameter from the URL
+      var currentId = this.props.params.id;
+      if (prevProps.params.id !== currentId) {
+        if (currentId) {
+          this.loadEmployeeData(currentId);
+        } else {
+          // If there is no ID then reset the state
+          this.setState({
+            employee: null,
+            isEdit: false,
+            errors: {}
+          });
+        }
+      }
+    }
+  }, {
     key: "validateForm",
     value:
     // validation for the form
@@ -601,14 +619,15 @@ var EmployeeDirectory = /*#__PURE__*/function (_React$Component) {
     _this = _callSuper(this, EmployeeDirectory, [props]);
     // Fetching the employees according to the type parameter
     _defineProperty(_this, "loadData", /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var params, type, query, response, result;
+      var params, type, upcomingRetirement, query, response, result;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             params = new URLSearchParams(_this.props.myloc.search); //parsing the query parameters from URL
             type = params.get("type") || "";
-            query = "query  {\n        employees (type: \"".concat(type, "\") {\n          id firstName lastName dob age dateOfJoining title department employeeType contractType\n        }\n      }");
-            _context.next = 5;
+            upcomingRetirement = params.get("upcomingRetirement") === "true";
+            query = "\n    query {\n      employees(type: \"".concat(type, "\", upcomingRetirement: ").concat(upcomingRetirement, ") {\n        id\n        firstName\n        lastName\n        dob\n        age\n        dateOfJoining\n        title\n        department\n        employeeType\n        contractType\n        retirementDate\n        remainingTime {\n          years\n          months\n          days\n        }\n      }\n    }\n  ");
+            _context.next = 6;
             return fetch("/graphql", {
               method: "POST",
               headers: {
@@ -618,16 +637,16 @@ var EmployeeDirectory = /*#__PURE__*/function (_React$Component) {
                 query: query
               })
             });
-          case 5:
+          case 6:
             response = _context.sent;
-            _context.next = 8;
+            _context.next = 9;
             return response.json();
-          case 8:
+          case 9:
             result = _context.sent;
             _this.setState({
               employees: result.data.employees
             }); // the state is updated with the fetched employee data
-          case 10:
+          case 11:
           case "end":
             return _context.stop();
         }
@@ -742,6 +761,10 @@ function EmployeeSearch() {
     _useState2 = _slicedToArray(_useState, 2),
     employeeType = _useState2[0],
     setEmployeeType = _useState2[1]; // to store the selected employee
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState4 = _slicedToArray(_useState3, 2),
+    upcomingRetirement = _useState4[0],
+    setUpcomingRetirement = _useState4[1]; // New state to store the upcomingRetirement filter
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_1__.useNavigate)();
   var location = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_1__.useLocation)();
 
@@ -749,12 +772,15 @@ function EmployeeSearch() {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var params = new URLSearchParams(location.search);
     var type = params.get("type") || "";
+    var retirement = params.get("upcomingRetirement") === "true"; // Check if retirement filter is set
     setEmployeeType(type); // Updating the state
+    setUpcomingRetirement(retirement);
   }, [location.search]); // this triggers when the query string changes
 
-  // function to filter employees based on type and updates the URL 
+  // function to filter employees based on type and updates the URL
   var filterEmpType = function filterEmpType() {
-    navigate("/employees?type=".concat(employeeType)); // this is to navigate to the updated url
+    var query = "/employees?type=".concat(employeeType, "&upcomingRetirement=").concat(upcomingRetirement);
+    navigate(query);
   };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("select", {
     name: "employeeType",
@@ -772,9 +798,13 @@ function EmployeeSearch() {
     value: "Contract"
   }, "Contract"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
     value: "Seasonal"
-  }, "Seasonal"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
-    value: "upcomingRetirement"
-  }, "Upcoming Retirement")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+  }, "Seasonal")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    type: "checkbox",
+    checked: upcomingRetirement,
+    onChange: function onChange() {
+      return setUpcomingRetirement(!upcomingRetirement);
+    } // Toggle the retirement filter
+  }), "Show Upcoming Retirement"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     onClick: filterEmpType
   }, "Search "));
 }

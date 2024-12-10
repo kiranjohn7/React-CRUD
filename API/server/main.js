@@ -46,9 +46,23 @@ async function loadSchema() {
   });
 
   //Filtering the employee by type
-  async function getEmployees(_, { type }) {
+  async function getEmployees(_, { type, upcomingRetirement }) {
     const employees = await getAllEmployees();
-    const filteredEmployees = filterEmployees(employees, type);
+
+    let filteredEmployees = employees;
+    if (type) {
+      filteredEmployees = filteredEmployees.filter(
+        (employee) => employee.employeeType === type
+      );
+    }
+
+    if (upcomingRetirement !== undefined) {
+      filteredEmployees = filterEmployeesByRetirement(
+        filteredEmployees,
+        upcomingRetirement
+      );
+    }
+
     return filteredEmployees.map(handleEmployementRetirement);
   }
 
@@ -98,17 +112,20 @@ async function loadSchema() {
     };
   }
 
-  function filterEmployees(employees, type, today = new Date()) {
-    if (type === "upcomingRetirement") {
-      const sixMonthCalc = new Date(today);
-      sixMonthCalc.setMonth(today.getMonth() + 6);
-
+  function filterEmployeesByRetirement(employees, upcomingRetirement, today = new Date()) {
+    if (upcomingRetirement) {
+      // Calculate the threshold for retirement (next 6 months)
+      const sixMonthsAhead = new Date(today);
+      sixMonthsAhead.setMonth(today.getMonth() + 6);
+  
       return employees.filter((employee) => {
         const { retirementDate } = retirementCalc(employee);
         const retirementDateObj = new Date(retirementDate);
-        return retirementDateObj > today && retirementDateObj <= sixMonthCalc;
+        return retirementDateObj > today && retirementDateObj <= sixMonthsAhead;
       });
     }
+  
+    // If upcomingRetirement is false or undefined, return all employees
     return employees;
   }
 
