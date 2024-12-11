@@ -18,7 +18,7 @@ const app = express();
 const GraphQlDateResolver = new GraphQLScalarType({
   name: "GraphQlDate",
   serialize(value) {
-    return value.toISOString(); //converting date object to ISO string format
+    return value.toISOString().split('T')[0]; //converting date object to ISO string format and converting to string format for frontend YYYY-MM-DD
   },
   parseValue(value) {
     const date = new Date(value);
