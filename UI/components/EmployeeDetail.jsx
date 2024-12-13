@@ -1,5 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { Container, Row, Col, Card, Alert } from "react-bootstrap";
+import { FaUser , FaCalendarAlt, FaBriefcase, FaBuilding, FaClock } from 'react-icons/fa';
 
 function detailParams(EmpD) {
   return (props) => {
@@ -17,12 +19,10 @@ class EmployeeDetail extends React.Component {
     };
   }
 
-  // Loading the employee datas
   componentDidMount() {
     this.loadEmployeeData();
   }
 
-  // Getting the employee based on ID params
   loadEmployeeData = async () => {
     const { id } = this.props.params;
     try {
@@ -54,7 +54,6 @@ class EmployeeDetail extends React.Component {
 
       const result = await response.json();
 
-      // Checking if we are getting the employee data and updating the state
       if (result.data && result.data.employee) {
         this.setState({
           employee: result.data.employee,
@@ -71,7 +70,6 @@ class EmployeeDetail extends React.Component {
     }
   };
 
-  // To reload the employee datas if the route params changes
   componentDidUpdate(prevProps) {
     if (this.props.params.id !== prevProps.params.id) {
       this.loadEmployeeData();
@@ -80,55 +78,55 @@ class EmployeeDetail extends React.Component {
 
   render() {
     const { employee, error } = this.state;
+
     if (error) {
-      return <div>{error}</div>;
+      return (
+        <Container className="mt-4">
+          <Alert variant="danger">
+            {error}
+          </Alert>
+        </Container>
+      );
     }
 
     return (
-      <div>
-        <h1>Employee Details</h1>
+      <Container className="mt-4">
+        <h1 className="text-center mb-4">Employee Details</h1>
         {employee && (
-          <div>
-            <p>
-              <b>First Name:</b> {employee.firstName}
-            </p>
-            <p>
-              <b>Last Name:</b> {employee.lastName}
-            </p>
-            <p>
-              <b>DOB:</b> {new Date(employee.dob).toDateString()}
-            </p>
-            <p>
-              <b>Age:</b> {employee.age}
-            </p>
-            <p>
-              <b>Date of Joining:</b> {new Date(employee.dateOfJoining).toDateString()}
-            </p>
-            <p>
-              <b>Title:</b> {employee.title}
-            </p>
-            <p>
-              <b>Department:</b> {employee.department}
-            </p>
-            <p>
-              <b>Employee Type:</b> {employee.employeeType}
-            </p>
-            <p>
-              <b>Contract Type:</b>{" "}
-              {employee.contractType ? "Working" : "Retired"}
-            </p>
-            <p>
-              <b>Retirement Date:</b> {new Date(employee.retirementDate).toDateString()}
-            </p>
-            <p>
-              <b>Time Left Until Retirement:</b>{" "}
-              {employee.remainingTime.years} years, {employee.remainingTime.months} months, {employee.remainingTime.days} days
-            </p>
-          </div>
+          <Card className="shadow">
+            <Card.Body>
+              <Row>
+                <Col sm={6}>
+                  <p><FaUser className="text-primary" />&nbsp; <b>First Name:</b> {employee.firstName}</p>
+                  <p><FaUser className="text-primary" />&nbsp; <b>Last Name:</b> {employee.lastName}</p>
+                  <p><FaCalendarAlt className="text-primary" /> &nbsp;<b>DOB:</b> {new Date(employee.dob).toDateString()}</p>
+                  <p><FaClock className="text-primary" /> &nbsp;<b>Age:</b> {employee.age}</p>
+                  <p><FaCalendarAlt className="text-primary" /> &nbsp;<b>Date of Joining:</b> {new Date(employee.dateOfJoining).toDateString()}</p>
+                </Col>
+                <Col sm={6}>
+                  <p><FaBriefcase className="text-primary" /> &nbsp;<b>Title:</b> {employee.title}</p>
+                  <p><FaBuilding className="text-primary"/> &nbsp;<b>Department:</b> {employee.department}</p>
+                  <p><FaBriefcase className="text-primary"/>&nbsp; <b>Employee Type:</b> {employee.employeeType}</p>
+                  <p><FaBriefcase className="text-primary"/>&nbsp; <b>Contract Type:</b> {employee.contractType ? "Permanent" : "Temporary"}</p>
+                  <p><FaCalendarAlt className="text-primary"/>&nbsp; <b>Retirement Date:</b> {new Date(employee.retirementDate).toDateString()}</p>
+                  
+                </Col><br/><br/>
+
+                <Col sm={12} className="text-center">
+                  <p style={{ fontSize: '1.25rem', color: 'red' }}>
+                    <FaClock className="text-danger" />&nbsp; 
+                    <b>Time Left Until Retirement:</b> {employee.remainingTime.years} years, {employee.remainingTime.months} months, {employee.remainingTime.days} days
+                  </p>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
         )}
-      </div>
+      </Container>
     );
   }
 }
+
+
 
 export default detailParams(EmployeeDetail);

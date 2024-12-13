@@ -47,6 +47,14 @@ module.exports = {
           },
         },
       },
+      {
+        test: /\.css$/, // Rule for CSS files
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/i, // Rule for font files
+        type: "asset/resource",
+      },
     ],
   },
   optimization: {
